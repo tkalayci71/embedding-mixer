@@ -1,4 +1,4 @@
-# Embedding-mixer version 0.1
+# Embedding-mixer version 0.2
 
 Similar to Embedding Inspector, more powerful but not user-friendly, text-only, for advanced users. Not tested, provided as-is.
 
@@ -12,7 +12,7 @@ Similar to Embedding Inspector, more powerful but not user-friendly, text-only, 
 	# mix embeddings by adding their vector values (if vector counts differ, pad with zeros)
 	mix ( emb('cat') * 0.6 , emb('astronaut') * 0.7 ) 
 	
-	# concatenate embeddings by stacking their vectors
+	# concantate embeddings by stacking their vectors
 	concat( emb('mona')*0.3 , emb('lisa')*0.3 , emb('wearing'), emb('sunglasses') ) 
 
 	# reduce embedding to 1-vector by summing all of its vectors
@@ -31,7 +31,10 @@ Similar to Embedding Inspector, more powerful but not user-friendly, text-only, 
 	mix ( process(emb('cat'),'=v*(i<300)') , process(emb('dog'),'=v*(i>=300)') )
 
 	# create random embedding
-	torch.randn(768)/40
+	torch.randn(768)/50
+	
+	# scale magnitude to 1
+	process(  emb('cat')  , '=v/vec_mag')
 
 	# load tensor saved by inspector
 	torch.tensor([[ 1.2886e-02, -7.1144e-03, -6.7101e-03, -3.5076e-03,  6.6986e-03, ......... ]])
@@ -44,8 +47,6 @@ Log will show function calls, but not all operations, as the string is parsed by
 You can copy the formula from the text box, and save it for later use.
 
 Eval string usage is the same as Embedding inspector, but also following variables are available:
-vec_mag: magnitude of the vector
-vec_min: minimum value in the vector
-vec_max: maximum value in the vector
+vec_mag: magnitude of the vector, vec_min: minimum value in the vector, vec_max: maximum value in the vector
 
 note: vector size is 768 for SD1 and 1024 for SD2, different vector sizes can not be intermixed.
