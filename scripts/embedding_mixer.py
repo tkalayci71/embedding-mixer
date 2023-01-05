@@ -1,4 +1,4 @@
-# Embedding Mixer version 0.1
+# Embedding Mixer version 0.11
 #
 # https://github.com/tkalayci71/embedding-mixer
 #
@@ -247,7 +247,7 @@ def do_save(step_str, formula_str, save_name, enable_overwrite):
 
     step_str = step_str.strip().lower()
     save_name = save_name.strip().lower()
-    formula_str = formula_str.strip().lower()
+    formula_str = formula_str.strip()
     if (formula_str==''): return 'Error: Formula is empty', None
 
     log = []
