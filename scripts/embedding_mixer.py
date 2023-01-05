@@ -1,4 +1,4 @@
-# Embedding Mixer version 0.11
+# Embedding Mixer version 0.2
 #
 # https://github.com/tkalayci71/embedding-mixer
 #
@@ -170,6 +170,9 @@ def remove(source_vec,vec_nos):
     return tot_vec
 
 def process(source_vec, eval_txt):
+    if type(source_vec)==torch.Tensor:
+            if len(source_vec.shape)==1: source_vec =source_vec.unsqueeze(0)
+
     tot_vec = source_vec
     vec = tot_vec.clone()
     try:
@@ -243,6 +246,66 @@ def eval_formula(formula_str):
 
 #-------------------------------------------------------------------------------
 
+MAX_SIMILAR_EMBS = 30 # number of similar embeddings to show
+VEC_SHOW_TRESHOLD = 1 # change to 10000 to see all values
+VEC_SHOW_PROFILE = 'default' #change to 'full' for more precision
+SEP_STR = '-'*80 # separator string
+
+def inspect_str(emb_vec):
+
+    results = []
+
+    results.append('\n'+SEP_STR)
+
+    vec_count = emb_vec.shape[0]
+    vec_size = emb_vec.shape[1]
+    results.append('Vector count: '+str(vec_count))
+    results.append('Vector size: '+str(vec_size))
+    results.append(SEP_STR)
+
+    # add all vector infos to results
+    tokenizer, internal_embs, loaded_embs = get_data()
+    all_embs = internal_embs.to(device='cpu',dtype=torch.float32)# all internal embeddings copied to cpu as float32
+
+    torch.set_printoptions(threshold=VEC_SHOW_TRESHOLD,profile=VEC_SHOW_PROFILE)
+
+    for v in range(vec_count):
+
+        vec_v = emb_vec[v].to(device='cpu',dtype=torch.float32)
+
+        # add tensor values to results
+
+        results.append('Vector['+str(v)+'] = '+str(vec_v))
+        results.append('Magnitude: '+str(torch.linalg.norm(vec_v).item()))
+        results.append('Min, Max: '+str(torch.min(vec_v).item())+', '+str(torch.max(vec_v).item()))
+
+
+        # calculate similar embeddings and add to results
+        if vec_v.shape[0]!=internal_embs.shape[1]:
+            results.append('Vector size is not compatible with current SD model')
+            results.append(SEP_STR)
+            continue
+
+        results.append('')
+        results.append("Similar embeddings:")
+        cos = torch.nn.CosineSimilarity(dim=1, eps=1e-6)
+        scores = cos(all_embs, vec_v)
+        sorted_scores, sorted_ids = torch.sort(scores, descending=True)
+        best_ids = sorted_ids[0:MAX_SIMILAR_EMBS].numpy()
+        r = []
+        for i in range(0, MAX_SIMILAR_EMBS):
+            emb_id = best_ids[i].item()
+            emb_name = emb_id_to_name(emb_id, tokenizer)
+            score_str = ''
+            r.append(emb_name+'('+str(emb_id)+')')
+        results.append('   '.join(r))
+
+        results.append(SEP_STR)
+
+    return '\n'.join(results)
+
+#-------------------------------------------------------------------------------
+
 def do_save(step_str, formula_str, save_name, enable_overwrite):
 
     step_str = step_str.strip().lower()
@@ -297,6 +360,8 @@ def do_save(step_str, formula_str, save_name, enable_overwrite):
             plt.plot(x.numpy(), tot_vec[u].numpy())
             saved_graph = figure_to_image(fig)
 
+        log.append(inspect_str(tot_vec))
+
     return '\n'.join(log), saved_graph
 
 #-------------------------------------------------------------------------------
@@ -304,7 +369,7 @@ def do_save(step_str, formula_str, save_name, enable_overwrite):
 def add_tab():
     with gr.Blocks(analytics_enabled=False) as ui:
         with gr.Row():
-            formula_str = gr.Textbox(label="Formula", lines=12)
+            formula_str = gr.Textbox(label="Formula", lines=10)
         with gr.Row():
             with gr.Column(scale=1): step_str = gr.Textbox(label="Step", lines=1, placeholder='only for training')
             with gr.Column(scale=1): save_name = gr.Textbox(label="Filename", lines=1, placeholder='Enter file name to save')
