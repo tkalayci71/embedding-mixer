@@ -12,7 +12,7 @@ Similar to Embedding Inspector, more powerful but not user-friendly, text-only, 
 	# mix embeddings by adding their vector values (if vector counts differ, pad with zeros)
 	mix ( emb('cat') * 0.6 , emb('astronaut') * 0.7 ) 
 	
-	# concantate embeddings by stacking their vectors
+	# concatenate embeddings by stacking their vectors
 	concat( emb('mona')*0.3 , emb('lisa')*0.3 , emb('wearing'), emb('sunglasses') ) 
 
 	# reduce embedding to 1-vector by summing all of its vectors
@@ -31,7 +31,7 @@ Similar to Embedding Inspector, more powerful but not user-friendly, text-only, 
 	mix ( process(emb('cat'),'=v*(i<300)') , process(emb('dog'),'=v*(i>=300)') )
 
 	# create random embedding
-	torch.rand(768)/40
+	torch.randn(768)/40
 
 	# load tensor saved by inspector
 	torch.tensor([[ 1.2886e-02, -7.1144e-03, -6.7101e-03, -3.5076e-03,  6.6986e-03, ......... ]])
