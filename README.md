@@ -27,6 +27,16 @@ Similar to Embedding Inspector, more powerful but not user-friendly, text-only, 
 	# evaluate and apply this eval string on the embedding
 	process ( emb('cat'), '=(1*(v>=0)-1*(v<0))/50' ) 
 
+	# example of a compound formula
+	mix ( process(emb('cat'),'=v*(i<300)') , process(emb('dog'),'=v*(i>=300)') )
+
+	# create random embedding
+	torch.rand(768)/40
+
+	# load tensor saved by inspector
+	torch.tensor([[ 1.2886e-02, -7.1144e-03, -6.7101e-03, -3.5076e-03,  6.6986e-03, ......... ]])
+
+
 ---
 
 The functions above can be combined to create complex formulas.
