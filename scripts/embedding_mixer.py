@@ -1,4 +1,4 @@
-# Embedding Mixer version 0.2
+# Embedding Mixer version 0.21
 #
 # https://github.com/tkalayci71/embedding-mixer
 #
@@ -200,6 +200,80 @@ def process(source_vec, eval_txt):
     except Exception as e:
         formula_log.append('Error processing: "'+eval_txt+'" - '+str(e))
     return tot_vec
+
+def mostsimilar(source_vec):
+
+    if type(source_vec)!=torch.Tensor: return None
+    if len(source_vec.shape)==1: source_vec =source_vec.unsqueeze(0)
+    if ((source_vec.shape[1]!=768) and (source_vec.shape[1]!=1024)): return None
+
+    emb_vec = source_vec
+    vec_count = emb_vec.shape[0]
+
+    tokenizer, internal_embs, loaded_embs = get_data()
+    all_embs = internal_embs.to(device='cpu',dtype=torch.float32)# all internal embeddings copied to cpu as float32
+
+    if source_vec.shape[1]!=internal_embs.shape[1]: return None
+
+    result_vec = torch.zeros_like(emb_vec)
+
+    for v in range(vec_count):
+        vec_v = emb_vec[v].to(device='cpu',dtype=torch.float32)
+        cos = torch.nn.CosineSimilarity(dim=1, eps=1e-6)
+        scores = cos(all_embs, vec_v)
+        sorted_scores, sorted_ids = torch.sort(scores, descending=True)
+        best_id = sorted_ids[0].numpy()
+        result_vec[v] = all_embs[best_id]
+
+    return result_vec
+
+def keepmax(source_vec, numkeep):
+    if type(source_vec)!=torch.Tensor: return None
+    if len(source_vec.shape)==1: source_vec =source_vec.unsqueeze(0)
+    if ((source_vec.shape[1]!=768) and (source_vec.shape[1]!=1024)): return None
+
+    result_vec = torch.zeros_like(source_vec)
+    emb_vec = source_vec.clone()
+    vec_count = emb_vec.shape[0]
+    for v in range(vec_count):
+        vec_v = emb_vec[v]
+        for n in range(numkeep):
+            maxindex = torch.argmax(vec_v)
+            result_vec[v,maxindex] = vec_v[maxindex]
+            vec_v[maxindex] = -10000000
+    return result_vec
+
+def keepmin(source_vec, numkeep):
+    if type(source_vec)!=torch.Tensor: return None
+    if len(source_vec.shape)==1: source_vec =source_vec.unsqueeze(0)
+    if ((source_vec.shape[1]!=768) and (source_vec.shape[1]!=1024)): return None
+
+    result_vec = torch.zeros_like(source_vec)
+    emb_vec = source_vec.clone()
+    vec_count = emb_vec.shape[0]
+    for v in range(vec_count):
+        vec_v = emb_vec[v]
+        for n in range(numkeep):
+            minindex = torch.argmin(vec_v)
+            result_vec[v,minindex] = vec_v[minindex]
+            vec_v[minindex] = +10000000
+    return result_vec
+
+def keepabsmax(source_vec, numkeep):
+    if type(source_vec)!=torch.Tensor: return None
+    if len(source_vec.shape)==1: source_vec =source_vec.unsqueeze(0)
+    if ((source_vec.shape[1]!=768) and (source_vec.shape[1]!=1024)): return None
+
+    result_vec = torch.zeros_like(source_vec)
+    emb_vec = source_vec.clone()
+    vec_count = emb_vec.shape[0]
+    for v in range(vec_count):
+        vec_v = emb_vec[v]
+        for n in range(numkeep):
+            maxindex = torch.argmax(torch.abs(vec_v))
+            result_vec[v,maxindex] = vec_v[maxindex]
+            vec_v[maxindex] = 0
+    return result_vec
 
 #-------------------------------------------------------------------------------
 
