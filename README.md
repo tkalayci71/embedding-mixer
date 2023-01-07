@@ -1,4 +1,4 @@
-# Embedding-mixer version 0.21
+# Embedding-mixer version 0.3
 
 Similar to Embedding Inspector, more powerful but not user-friendly, text-only, for advanced users. Not tested, provided as-is.
 
@@ -57,3 +57,27 @@ Eval string usage is the same as Embedding inspector, but also following variabl
 vec_mag: magnitude of the vector, vec_min: minimum value in the vector, vec_max: maximum value in the vector
 
 note: vector size is 768 for SD1 and 1024 for SD2, different vector sizes can not be intermixed.
+
+# Run script feature:
+
+
+---
+	#Formula
+	emb(name1)*weight1+emb(name2)*weight2
+
+---
+
+---
+	#Script
+	global name1, name2, weight1, weight2
+	for n in range(5):
+		name1 ='chicken'
+		name2 ='dinosaur'
+		weight1 = n/5
+		weight2 = 1-n/5
+		fnam = 'test'+str(n)
+		do_save('', formula_str , fnam, True)
+
+---
+
+log and graph may not be updated but running the above script will save 5 embeddings.
