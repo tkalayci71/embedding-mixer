@@ -1,4 +1,4 @@
-# Embedding Mixer version 0.21
+# Embedding Mixer version 0.3
 #
 # https://github.com/tkalayci71/embedding-mixer
 #
@@ -224,6 +224,8 @@ def mostsimilar(source_vec):
         sorted_scores, sorted_ids = torch.sort(scores, descending=True)
         best_id = sorted_ids[0].numpy()
         result_vec[v] = all_embs[best_id]
+        emb_name = emb_id_to_name(int(best_id), tokenizer)
+        formula_log.append('mostsimilar = '+emb_name+'('+str(best_id)+')')
 
     return result_vec
 
@@ -232,6 +234,7 @@ def keepmax(source_vec, numkeep):
     if len(source_vec.shape)==1: source_vec =source_vec.unsqueeze(0)
     if ((source_vec.shape[1]!=768) and (source_vec.shape[1]!=1024)): return None
 
+    keeplist = []
     result_vec = torch.zeros_like(source_vec)
     emb_vec = source_vec.clone()
     vec_count = emb_vec.shape[0]
@@ -240,7 +243,9 @@ def keepmax(source_vec, numkeep):
         for n in range(numkeep):
             maxindex = torch.argmax(vec_v)
             result_vec[v,maxindex] = vec_v[maxindex]
+            keeplist.append(maxindex.item())
             vec_v[maxindex] = -10000000
+    formula_log.append('keepmax '+str(keeplist[0:5])+'...')
     return result_vec
 
 def keepmin(source_vec, numkeep):
@@ -248,6 +253,7 @@ def keepmin(source_vec, numkeep):
     if len(source_vec.shape)==1: source_vec =source_vec.unsqueeze(0)
     if ((source_vec.shape[1]!=768) and (source_vec.shape[1]!=1024)): return None
 
+    keeplist = []
     result_vec = torch.zeros_like(source_vec)
     emb_vec = source_vec.clone()
     vec_count = emb_vec.shape[0]
@@ -256,7 +262,9 @@ def keepmin(source_vec, numkeep):
         for n in range(numkeep):
             minindex = torch.argmin(vec_v)
             result_vec[v,minindex] = vec_v[minindex]
+            keeplist.append(minindex.item())
             vec_v[minindex] = +10000000
+    formula_log.append('keepmin '+str(keeplist[0:5])+'...')
     return result_vec
 
 def keepabsmax(source_vec, numkeep):
@@ -264,6 +272,7 @@ def keepabsmax(source_vec, numkeep):
     if len(source_vec.shape)==1: source_vec =source_vec.unsqueeze(0)
     if ((source_vec.shape[1]!=768) and (source_vec.shape[1]!=1024)): return None
 
+    keeplist = []
     result_vec = torch.zeros_like(source_vec)
     emb_vec = source_vec.clone()
     vec_count = emb_vec.shape[0]
@@ -272,7 +281,9 @@ def keepabsmax(source_vec, numkeep):
         for n in range(numkeep):
             maxindex = torch.argmax(torch.abs(vec_v))
             result_vec[v,maxindex] = vec_v[maxindex]
+            keeplist.append(maxindex.item())
             vec_v[maxindex] = 0
+    formula_log.append('keepabsmax '+str(keeplist[0:5])+'...')
     return result_vec
 
 #-------------------------------------------------------------------------------
@@ -440,6 +451,17 @@ def do_save(step_str, formula_str, save_name, enable_overwrite):
 
 #-------------------------------------------------------------------------------
 
+def do_run(formula_str, script_str):
+    script_str = script_str.strip()
+    result='OK'
+    try:
+        exec(script_str)
+    except Exception as e:
+        result= str(e)
+    return result, None
+
+#-------------------------------------------------------------------------------
+
 def add_tab():
     with gr.Blocks(analytics_enabled=False) as ui:
         with gr.Row():
@@ -452,8 +474,13 @@ def add_tab():
         with gr.Row():
             with gr.Column(scale=2): save_log = gr.Textbox(label="Save log", lines=10)
             with gr.Column(scale=1): save_graph = gr.Image(label="Save graph", interactive=False)
+        with gr.Row():
+            script_str = gr.Textbox(label="Script", lines=10, placeholder='warning: this python script will be executed, use at your own risk')
+        with gr.Row():
+            with gr.Column(scale=1): run_button = gr.Button(value="Run script", variant="primary")
 
         save_button.click(fn=do_save, inputs = [step_str, formula_str, save_name, enable_overwrite], outputs =[save_log, save_graph])
+        run_button.click(fn=do_run, inputs = [formula_str, script_str], outputs =[save_log, save_graph])
 
     return [(ui, "Embedding Mixer", "Mixer")]
 
