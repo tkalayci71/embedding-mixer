@@ -70,13 +70,15 @@ note: vector size is 768 for SD1 and 1024 for SD2, different vector sizes can no
 ---
 	#Script
 	global name1, name2, weight1, weight2
+	step_str = ''
+	overwrite = True
 	for n in range(5):
 		name1 ='chicken'
 		name2 ='dinosaur'
 		weight1 = n/5
 		weight2 = 1-n/5
 		fnam = 'test'+str(n)
-		do_save('', formula_str , fnam, True)
+		do_save(step_str, formula_str , fnam, overwrite)
 
 ---
 
