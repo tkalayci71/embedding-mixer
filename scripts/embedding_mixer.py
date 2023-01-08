@@ -461,7 +461,7 @@ def do_run(formula_str, script_str):
         sd_hijack.model_hijack.embedding_db.dir_mtime=0
         sd_hijack.model_hijack.embedding_db.load_textual_inversion_embeddings()
     except Exception as e:
-        result= str(e)
+        result_str= str(e)
     return result_str, None
 
 #-------------------------------------------------------------------------------
