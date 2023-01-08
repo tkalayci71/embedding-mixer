@@ -60,25 +60,22 @@ note: vector size is 768 for SD1 and 1024 for SD2, different vector sizes can no
 
 # Run script feature:
 
-
----
-	#Formula
-	emb(name1)*weight1+emb(name2)*weight2
-
 ---
 
----
-	#Script
-	global name1, name2, weight1, weight2
-	step_str = ''
-	overwrite = True
-	for n in range(5):
-		name1 ='chicken'
-		name2 ='dinosaur'
-		weight1 = n/5
-		weight2 = 1-n/5
-		fnam = 'test'+str(n)
-		do_save(step_str, formula_str , fnam, overwrite)
+    global result_str, name1, name2, weight1, weight2
+    step_str = ''
+    overwrite = True
+    fnams = []
+    for n in range(5):
+        name1 ='chicken'
+        name2 ='dinosaur'
+        weight1 = n/5
+        weight2 = 1-n/5
+        fnam = 'test'+str(n)
+        fnams.append(fnam)
+        formula_str = "emb(name1)*weight1+emb(name2)*weight2"
+        do_save(step_str, formula_str , fnam, overwrite, frombatch=True)
+    result_str = '\n'.join(fnams)
 
 ---
 
