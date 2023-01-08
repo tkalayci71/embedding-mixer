@@ -1,4 +1,4 @@
-# Embedding Mixer version 0.3
+# Embedding Mixer version 0.32
 #
 # https://github.com/tkalayci71/embedding-mixer
 #
@@ -391,7 +391,7 @@ def inspect_str(emb_vec):
 
 #-------------------------------------------------------------------------------
 
-def do_save(step_str, formula_str, save_name, enable_overwrite):
+def do_save(step_str, formula_str, save_name, enable_overwrite, frombatch=False):
 
     step_str = step_str.strip().lower()
     save_name = save_name.strip().lower()
@@ -435,30 +435,34 @@ def do_save(step_str, formula_str, save_name, enable_overwrite):
         except:
             log.append('Error saving "'+save_filename+'" (filename might be invalid)')
 
-        log.append('Reloading all embeddings')
-        sd_hijack.model_hijack.embedding_db.dir_mtime=0
-        sd_hijack.model_hijack.embedding_db.load_textual_inversion_embeddings()
+        if frombatch == False:
+            log.append('Reloading all embeddings')
+            sd_hijack.model_hijack.embedding_db.dir_mtime=0
+            sd_hijack.model_hijack.embedding_db.load_textual_inversion_embeddings()
 
-        fig = plt.figure()
-        for u in range(tot_vec.shape[0]):
-            x = torch.arange(start=0, end=tot_vec[u].shape[0], step=1)
-            plt.plot(x.numpy(), tot_vec[u].numpy())
-            saved_graph = figure_to_image(fig)
+            fig = plt.figure()
+            for u in range(tot_vec.shape[0]):
+                x = torch.arange(start=0, end=tot_vec[u].shape[0], step=1)
+                plt.plot(x.numpy(), tot_vec[u].numpy())
+                saved_graph = figure_to_image(fig)
 
-        log.append(inspect_str(tot_vec))
+            log.append(inspect_str(tot_vec))
 
     return '\n'.join(log), saved_graph
 
 #-------------------------------------------------------------------------------
 
 def do_run(formula_str, script_str):
+    global result_str
     script_str = script_str.strip()
-    result='OK'
+    result_str='OK'
     try:
         exec(script_str)
+        sd_hijack.model_hijack.embedding_db.dir_mtime=0
+        sd_hijack.model_hijack.embedding_db.load_textual_inversion_embeddings()
     except Exception as e:
         result= str(e)
-    return result, None
+    return result_str, None
 
 #-------------------------------------------------------------------------------
 
