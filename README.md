@@ -1,4 +1,4 @@
-# Embedding-mixer version 0.32
+# Embedding-mixer version 0.33
 
 Similar to Embedding Inspector, more powerful but not user-friendly, text-only, for advanced users. Not tested, provided as-is.
 
@@ -53,8 +53,7 @@ The functions above can be combined to create complex formulas.
 Log will show function calls, but not all operations, as the string is parsed by python itself.
 You can copy the formula from the text box, and save it for later use.
 
-Eval string usage is the same as Embedding inspector, but also following variables are available:
-vec_mag: magnitude of the vector, vec_min: minimum value in the vector, vec_max: maximum value in the vector
+Eval string usage is the same as Embedding inspector.
 
 note: vector size is 768 for SD1 and 1024 for SD2, different vector sizes can not be intermixed.
 
@@ -98,8 +97,6 @@ log and graph may not be updated but running the above script will save 5 embedd
 
 ---
 
-above script will save 10 embeddings which contain unit vectors 310 to 320. (What I call unit vector is when all 768 values are zero except one dimension. I found that a magnitude of ~6 is needed for such embeddings to work.) With this I'm trying to understand what each value is doing, for example I found that unit vector 319 consistently generates coin/money images, 418 some football images, etc.
+above script will save 10 embeddings which contain unit vectors 310 to 320. (What I call unit vector is when all 768 values are zero except one dimension. I found that a magnitude of ~6 is needed for such embeddings to work.) With this I'm trying to understand what each value is doing, for example I found that unit vector 319 consistently generates coin/money images, 418 some football images, etc. Also 75 seems to be 'cat dimension'
 
 ![image](images/dim319.jpg)  ![image](images/dim418.jpg)
-
-
