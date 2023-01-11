@@ -1,4 +1,4 @@
-# Embedding Mixer version 0.32
+# Embedding Mixer version 0.33
 #
 # https://github.com/tkalayci71/embedding-mixer
 #
@@ -12,6 +12,7 @@ from modules.textual_inversion.textual_inversion import Embedding
 from io import BytesIO
 from PIL import Image
 import torch, math, random
+from modules.shared import cmd_opts
 
 #-------------------------------------------------------------------------------
 
@@ -400,7 +401,8 @@ def do_save(step_str, formula_str, save_name, enable_overwrite, frombatch=False)
 
     log = []
 
-    save_filename = 'embeddings/'+save_name+'.bin'
+    #save_filename = 'embeddings/'+save_name+'.bin'
+    save_filename = path.join(cmd_opts.embeddings_dir, save_name+'.bin')
     file_exists = path.exists(save_filename)
     if (file_exists):
         if not(enable_overwrite):
@@ -437,8 +439,12 @@ def do_save(step_str, formula_str, save_name, enable_overwrite, frombatch=False)
 
         if frombatch == False:
             log.append('Reloading all embeddings')
-            sd_hijack.model_hijack.embedding_db.dir_mtime=0
-            sd_hijack.model_hijack.embedding_db.load_textual_inversion_embeddings()
+
+            try:
+                sd_hijack.model_hijack.embedding_db.load_textual_inversion_embeddings(force_reload=True)
+            except:
+                sd_hijack.model_hijack.embedding_db.dir_mtime=0
+                sd_hijack.model_hijack.embedding_db.load_textual_inversion_embeddings()
 
             fig = plt.figure()
             for u in range(tot_vec.shape[0]):
