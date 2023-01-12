@@ -1,4 +1,4 @@
-# Embedding Mixer version 0.33
+# Embedding Mixer version 0.34
 #
 # https://github.com/tkalayci71/embedding-mixer
 #
@@ -223,7 +223,7 @@ def mostsimilar(source_vec):
         cos = torch.nn.CosineSimilarity(dim=1, eps=1e-6)
         scores = cos(all_embs, vec_v)
         sorted_scores, sorted_ids = torch.sort(scores, descending=True)
-        best_id = sorted_ids[0].numpy()
+        best_id = sorted_ids[0].detach().numpy()
         result_vec[v] = all_embs[best_id]
         emb_name = emb_id_to_name(int(best_id), tokenizer)
         formula_log.append('mostsimilar = '+emb_name+'('+str(best_id)+')')
@@ -336,6 +336,14 @@ MAX_SIMILAR_EMBS = 30 # number of similar embeddings to show
 VEC_SHOW_TRESHOLD = 1 # change to 10000 to see all values
 VEC_SHOW_PROFILE = 'default' #change to 'full' for more precision
 SEP_STR = '-'*80 # separator string
+SHOW_SIMILARITY_SCORE = True # change to True to enable
+
+def score_to_percent(score):
+    if score>1.0:score=1.0
+    if score<-1.0:score=-1.0
+    ang = math.acos(score) / (math.pi/2)
+    per = math.ceil((1-ang)*100)
+    return per
 
 def inspect_str(emb_vec):
 
@@ -377,13 +385,16 @@ def inspect_str(emb_vec):
         cos = torch.nn.CosineSimilarity(dim=1, eps=1e-6)
         scores = cos(all_embs, vec_v)
         sorted_scores, sorted_ids = torch.sort(scores, descending=True)
-        best_ids = sorted_ids[0:MAX_SIMILAR_EMBS].numpy()
+        best_ids = sorted_ids[0:MAX_SIMILAR_EMBS].detach().numpy()
         r = []
         for i in range(0, MAX_SIMILAR_EMBS):
             emb_id = best_ids[i].item()
             emb_name = emb_id_to_name(emb_id, tokenizer)
             score_str = ''
-            r.append(emb_name+'('+str(emb_id)+')')
+            if SHOW_SIMILARITY_SCORE:
+                score_str=' '+str(score_to_percent(sorted_scores[i].item()))+'% '
+
+            r.append(emb_name+'('+str(emb_id)+')'+score_str)
         results.append('   '.join(r))
 
         results.append(SEP_STR)
@@ -449,7 +460,7 @@ def do_save(step_str, formula_str, save_name, enable_overwrite, frombatch=False)
             fig = plt.figure()
             for u in range(tot_vec.shape[0]):
                 x = torch.arange(start=0, end=tot_vec[u].shape[0], step=1)
-                plt.plot(x.numpy(), tot_vec[u].numpy())
+                plt.plot(x.detach().numpy(), tot_vec[u].detach().numpy())
                 saved_graph = figure_to_image(fig)
 
             log.append(inspect_str(tot_vec))
