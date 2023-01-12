@@ -1,4 +1,4 @@
-# Embedding-mixer version 0.33
+# Embedding-mixer version 0.34
 
 Similar to Embedding Inspector, more powerful but not user-friendly, text-only, for advanced users. Not tested, provided as-is.
 
@@ -99,4 +99,7 @@ log and graph may not be updated but running the above script will save 5 embedd
 
 above script will save 10 embeddings which contain unit vectors 310 to 320. (What I call unit vector is when all 768 values are zero except one dimension. I found that a magnitude of ~6 is needed for such embeddings to work.) With this I'm trying to understand what each value is doing, for example I found that unit vector 319 consistently generates coin/money images, 418 some football images, etc. Also 75 seems to be 'cat dimension'
 
-![image](images/dim319.jpg)  ![image](images/dim418.jpg)
+![image](images/dim319.jpg)  
+![image](images/dim418.jpg)
+![image](images/dim75.jpg)
+
