@@ -1,4 +1,4 @@
-# Embedding-mixer version 0.34
+# Embedding-mixer version 0.35
 
 Similar to Embedding Inspector, more powerful but not user-friendly, text-only, for advanced users. Not tested, provided as-is.
 
