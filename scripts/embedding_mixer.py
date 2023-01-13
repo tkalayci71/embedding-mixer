@@ -1,4 +1,4 @@
-# Embedding Mixer version 0.34
+# Embedding Mixer version 0.35
 #
 # https://github.com/tkalayci71/embedding-mixer
 #
@@ -337,6 +337,8 @@ VEC_SHOW_TRESHOLD = 1 # change to 10000 to see all values
 VEC_SHOW_PROFILE = 'default' #change to 'full' for more precision
 SEP_STR = '-'*80 # separator string
 SHOW_SIMILARITY_SCORE = True # change to True to enable
+ENABLE_GRAPH = True
+GRAPH_VECTOR_LIMIT = 8 # max number of vectors to draw in graph
 
 def score_to_percent(score):
     if score>1.0:score=1.0
@@ -432,6 +434,12 @@ def do_save(step_str, formula_str, save_name, enable_overwrite, frombatch=False)
     elif save_name=='':
          log.append('Error: Filename is empty')
     else:
+
+        log.append('Final embedding size: '+str(tot_vec.shape[0])+' x '+str(tot_vec.shape[1]))
+
+        if tot_vec.shape[0]>75:
+            log.append('WARNING: vector count>75, it may not work')
+
         new_emb = Embedding(tot_vec, save_name)
 
         if step_str!='':
@@ -457,10 +465,12 @@ def do_save(step_str, formula_str, save_name, enable_overwrite, frombatch=False)
                 sd_hijack.model_hijack.embedding_db.dir_mtime=0
                 sd_hijack.model_hijack.embedding_db.load_textual_inversion_embeddings()
 
-            fig = plt.figure()
-            for u in range(tot_vec.shape[0]):
-                x = torch.arange(start=0, end=tot_vec[u].shape[0], step=1)
-                plt.plot(x.detach().numpy(), tot_vec[u].detach().numpy())
+            if ENABLE_GRAPH:
+                fig = plt.figure()
+                for u in range(tot_vec.shape[0]):
+                    if u>=GRAPH_VECTOR_LIMIT: break
+                    x = torch.arange(start=0, end=tot_vec[u].shape[0], step=1)
+                    plt.plot(x.detach().numpy(), tot_vec[u].detach().numpy())
                 saved_graph = figure_to_image(fig)
 
             log.append(inspect_str(tot_vec))
